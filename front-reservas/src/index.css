@@ -1,0 +1,101 @@
+:root {
+  /* base de marca (enunciado) — se usan como tinte, no como bloques planos */
+  --color-blaze: #f06b04;
+  --color-orange-yellow: #fbb728;
+  --color-wheatfield: #f5ecd2;
+  --color-curious-blue: #2c9fc7;
+  --color-nice-blue: #1570ac;
+  --color-wine: #a1081f;
+
+  /* paleta ampliada al estilo del kit de referencia: base teal-oliva mate + acentos vivos */
+  --coral: #e2835f;
+  --coral-strong: #d9713f;
+  --teal-deep: #23312f;
+  --teal-mid: #33473f;
+  --success: #7fbf8a;
+  --success-strong: #63a86f;
+
+  /* sistema de significado */
+  --heading: var(--color-wheatfield);
+  --brand: var(--coral); /* acción primaria */
+  --info: var(--color-curious-blue); /* informativo / neutro-positivo */
+  --gold: var(--color-orange-yellow); /* resaltes cálidos, urgencia suave */
+  --ok: var(--success); /* válido / éxito */
+  --danger: var(--color-wine); /* SOLO error. nunca decorativo */
+
+  --bg-a: #34433f;
+  --bg-b: #53442f;
+  --ink: #f2ede0;
+  --mist: #b7c4bd;
+  --mist-soft: #82938a;
+
+  --panel: rgba(255, 255, 255, 0.05);
+  --panel-strong: rgba(255, 255, 255, 0.075);
+  --line: rgba(255, 255, 255, 0.11);
+  --line-soft: rgba(255, 255, 255, 0.07);
+
+  --danger-glow: rgba(161, 8, 31, 0.18);
+  --danger-line: rgba(161, 8, 31, 0.5);
+  --ok-glow: rgba(127, 191, 138, 0.16);
+  --ok-line: rgba(127, 191, 138, 0.5);
+
+  --radius-lg: 22px;
+  --radius-md: 15px;
+  --radius-sm: 11px;
+  --radius-pill: 999px;
+
+  font-family: "Inter", system-ui, sans-serif;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg-a);
+  color: var(--mist);
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  background-image: radial-gradient(1200px 700px at 0% -10%, rgba(44, 159, 199, 0.32), transparent 60%),
+    radial-gradient(1100px 750px at 105% 0%, rgba(226, 131, 95, 0.34), transparent 58%),
+    radial-gradient(1000px 800px at 50% 120%, rgba(251, 183, 40, 0.2), transparent 62%),
+    linear-gradient(135deg, var(--bg-a) 0%, var(--bg-b) 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3 {
+  font-family: "Space Grotesk", "Inter", sans-serif;
+  color: var(--heading);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+button {
+  font-family: inherit;
+}
+
+input,
+select {
+  font-family: inherit;
+  color-scheme: dark;
+}
+
+::selection {
+  background: var(--coral);
+  color: #241209;
+}
