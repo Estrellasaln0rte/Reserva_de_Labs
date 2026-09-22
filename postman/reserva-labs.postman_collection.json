@@ -1,0 +1,269 @@
+{
+  "info": {
+    "name": "Reserva de Labs",
+    "description": "Colección de pruebas para la API de Reserva de Labs (Fase 4). Cubre casos válidos (deben pasar) y casos de basura (deben rebotar con 400/404).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3010" },
+    { "key": "salaId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Salas",
+      "item": [
+        {
+          "name": "GET listar salas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/salas", "host": ["{{baseUrl}}"], "path": ["api", "salas"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"responde 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"es una lista\", function () { pm.expect(pm.response.json()).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST crear sala - válido",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Lab D · IA\",\n  \"edificio\": \"M\",\n  \"capacidad\": 18\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/salas", "host": ["{{baseUrl}}"], "path": ["api", "salas"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"crea la sala (201)\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"devuelve un id\", function () {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.have.property(\"id\");",
+                  "  pm.collectionVariables.set(\"salaId\", body.id);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST crear sala - basura (capacidad negativa)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Lab X\",\n  \"edificio\": \"M\",\n  \"capacidad\": -5\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/salas", "host": ["{{baseUrl}}"], "path": ["api", "salas"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"la basura rebota con 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"explica qué campos fallaron\", function () {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.have.property(\"detalles\");",
+                  "  pm.expect(body.detalles).to.have.property(\"capacidad\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST crear sala - basura (nombre muy corto)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"A\",\n  \"edificio\": \"M\",\n  \"capacidad\": 10\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/salas", "host": ["{{baseUrl}}"], "path": ["api", "salas"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"la basura rebota con 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"marca el campo nombre\", function () {",
+                  "  pm.expect(pm.response.json().detalles).to.have.property(\"nombre\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Reservas",
+      "item": [
+        {
+          "name": "POST crear reserva - válido",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"responsable\": \"Ana López\",\n  \"motivo\": \"Práctica de redes\",\n  \"inicio\": \"2026-12-01T14:00:00\",\n  \"fin\": \"2026-12-01T16:00:00\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/salas/{{salaId}}/reservas", "host": ["{{baseUrl}}"], "path": ["api", "salas", "{{salaId}}", "reservas"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"crea la reserva (201)\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"queda ligada a la sala\", function () {",
+                  "  pm.expect(pm.response.json().salaId).to.eql(Number(pm.collectionVariables.get(\"salaId\")));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST crear reserva - basura (fin antes de inicio)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"responsable\": \"Ana López\",\n  \"motivo\": \"Práctica de redes\",\n  \"inicio\": \"2026-12-01T16:00:00\",\n  \"fin\": \"2026-12-01T14:00:00\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/salas/{{salaId}}/reservas", "host": ["{{baseUrl}}"], "path": ["api", "salas", "{{salaId}}", "reservas"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"la basura rebota con 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"marca el campo fin\", function () {",
+                  "  pm.expect(pm.response.json().detalles).to.have.property(\"fin\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST crear reserva - basura (fecha en el pasado)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"responsable\": \"Ana López\",\n  \"motivo\": \"Práctica de redes\",\n  \"inicio\": \"2020-01-01T14:00:00\",\n  \"fin\": \"2020-01-01T16:00:00\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/salas/{{salaId}}/reservas", "host": ["{{baseUrl}}"], "path": ["api", "salas", "{{salaId}}", "reservas"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"la basura rebota con 400\", function () { pm.response.to.have.status(400); });",
+                  "pm.test(\"marca el campo inicio\", function () {",
+                  "  pm.expect(pm.response.json().detalles).to.have.property(\"inicio\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST crear reserva - basura (id de sala inválido)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"responsable\": \"Ana López\",\n  \"motivo\": \"Práctica de redes\",\n  \"inicio\": \"2026-12-01T14:00:00\",\n  \"fin\": \"2026-12-01T16:00:00\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/salas/abc/reservas", "host": ["{{baseUrl}}"], "path": ["api", "salas", "abc", "reservas"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"id inválido rebota con 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Borrar sala",
+      "item": [
+        {
+          "name": "DELETE sala inexistente",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/salas/999999", "host": ["{{baseUrl}}"], "path": ["api", "salas", "999999"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"sala no encontrada -> 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE sala existente",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/salas/{{salaId}}", "host": ["{{baseUrl}}"], "path": ["api", "salas", "{{salaId}}"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"borra la sala -> 204\", function () { pm.response.to.have.status(204); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
